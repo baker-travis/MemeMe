@@ -18,6 +18,7 @@ class ViewController: UIViewController {
    @IBOutlet weak var titleBar: UINavigationBar!
    @IBOutlet weak var toolbar: UIToolbar!
    
+   // basic attributes for meme text fields
    let defaultTextAttributes: [String:Any?] = [
       NSStrokeColorAttributeName: UIColor(ciColor: .black()),
       NSStrokeWidthAttributeName: -3.0,
@@ -28,10 +29,17 @@ class ViewController: UIViewController {
    override func viewDidLoad() {
       super.viewDidLoad()
       
+      // Disable camera when the device doesn't have one
       cameraButton.isEnabled = UIImagePickerController.isSourceTypeAvailable(.camera)
+      
+      // Allow user to see picture behind toolbar and title bar
       titleBar.isTranslucent = true
       toolbar.isTranslucent = true
+      
+      // Disable share button until there is something to share
       shareButton.isEnabled = false
+      
+      // Text field setup
       topTextField.defaultTextAttributes = defaultTextAttributes
       topTextField.textAlignment = .center
       topTextField.delegate = self
@@ -70,6 +78,8 @@ class ViewController: UIViewController {
       present(imagePicker, animated: true, completion: nil)
    }
    
+   // MARK: class methods
+   // Prepares a meme for sharing and opens the activity view controller
    @IBAction func shareMeme(_ sender: Any) {
       let image = getMemedImage()
       let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
@@ -81,6 +91,7 @@ class ViewController: UIViewController {
       present(activityVC, animated: true, completion: nil)
    }
    
+   // Resets the meme, including clearing the picture
    @IBAction func cancelMemeEditor(_ sender: Any) {
       memeImageView.image = nil
       topTextField.text = "TOP"
@@ -89,7 +100,7 @@ class ViewController: UIViewController {
       shareButton.isEnabled = false
    }
    
-   //MARK: Utility Functions
+   // Prepares and returns an image of the meme with the text embedded
    func getMemedImage() -> UIImage {
       //Hide title bar and tool bar
       titleBar.isHidden = true
@@ -107,12 +118,14 @@ class ViewController: UIViewController {
       return memedImage
    }
    
+   // Will save the image somewhere in a future iteration
    func saveImage(_ memedImage: UIImage) {
       let meme = Meme(withTopText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: memeImageView.image!, memedImage: memedImage)
       
       //TODO: Save this meme somewhere
    }
    
+   // MARK: Notifications
    func subscribeToKeyboardNotifications() {
       NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: .UIKeyboardWillShow, object: nil)
       NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: .UIKeyboardWillHide, object: nil)
@@ -123,10 +136,12 @@ class ViewController: UIViewController {
       NotificationCenter.default.removeObserver(self, name: .UIKeyboardWillHide, object: nil)
    }
    
+   // Move view up when the keyboard appears
    func keyboardWillShow(_ notification: Notification) {
-//      view.frame.origin.y = getKeyboardHeight(notification) * -1
+      view.frame.origin.y = getKeyboardHeight(notification) * -1
    }
    
+   // Move view back to original position when keyboard disappears
    func keyboardWillHide(_ notification: Notification) {
       view.frame.origin.y = 0
    }
