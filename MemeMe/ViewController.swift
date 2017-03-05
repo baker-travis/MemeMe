@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class MemeEditorViewController: UIViewController {
    //MARK: Properties
    @IBOutlet weak var memeImageView: UIImageView!
    @IBOutlet weak var cameraButton: UIBarButtonItem!
@@ -40,12 +40,8 @@ class ViewController: UIViewController {
       shareButton.isEnabled = false
       
       // Text field setup
-      topTextField.defaultTextAttributes = defaultTextAttributes
-      topTextField.textAlignment = .center
-      topTextField.delegate = self
-      bottomTextField.defaultTextAttributes = defaultTextAttributes
-      bottomTextField.textAlignment = .center
-      bottomTextField.delegate = self
+      configureTextField(topTextField)
+      configureTextField(bottomTextField)
    }
    
    override func viewWillAppear(_ animated: Bool) {
@@ -63,22 +59,22 @@ class ViewController: UIViewController {
    
    //MARK: IBActions
    @IBAction func pickFromAlbum(_ sender: Any) {
-      let imagePicker = UIImagePickerController()
-      imagePicker.delegate = self
-      imagePicker.sourceType = .photoLibrary
-      
-      present(imagePicker, animated: true, completion: nil)
+      pickImageFrom(source: .photoLibrary)
    }
    
    @IBAction func pickFromCamera(_ sender: Any) {
+      pickImageFrom(source: .camera)
+   }
+   
+   // MARK: class methods
+   func pickImageFrom(source: UIImagePickerControllerSourceType) {
       let imagePicker = UIImagePickerController()
       imagePicker.delegate = self
-      imagePicker.sourceType = .camera
+      imagePicker.sourceType = source
       
       present(imagePicker, animated: true, completion: nil)
    }
    
-   // MARK: class methods
    // Prepares a meme for sharing and opens the activity view controller
    @IBAction func shareMeme(_ sender: Any) {
       let image = getMemedImage()
@@ -120,9 +116,15 @@ class ViewController: UIViewController {
    
    // Will save the image somewhere in a future iteration
    func saveImage(_ memedImage: UIImage) {
-      let meme = Meme(withTopText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: memeImageView.image!, memedImage: memedImage)
+      let meme = Meme(topText: topTextField.text!, bottomText: bottomTextField.text!, originalImage: memeImageView.image!, memedImage: memedImage)
       
       //TODO: Save this meme somewhere
+   }
+   
+   func configureTextField(_ textField: UITextField) {
+      textField.defaultTextAttributes = defaultTextAttributes
+      textField.textAlignment = .center
+      textField.delegate = self
    }
    
    // MARK: Notifications
@@ -138,7 +140,9 @@ class ViewController: UIViewController {
    
    // Move view up when the keyboard appears
    func keyboardWillShow(_ notification: Notification) {
-      view.frame.origin.y = getKeyboardHeight(notification) * -1
+      if bottomTextField.isFirstResponder {
+         view.frame.origin.y = getKeyboardHeight(notification) * -1
+      }
    }
    
    // Move view back to original position when keyboard disappears
@@ -155,7 +159,7 @@ class ViewController: UIViewController {
 }
 
 //MARK: UITextFieldDelegate
-extension ViewController: UITextFieldDelegate {
+extension MemeEditorViewController: UITextFieldDelegate {
    func textFieldDidBeginEditing(_ textField: UITextField) {
       textField.textAlignment = .center
       textField.text = ""
@@ -168,7 +172,7 @@ extension ViewController: UITextFieldDelegate {
 }
 
 //MARK: UIImagePickerControllerDelegate
-extension ViewController: UIImagePickerControllerDelegate {
+extension MemeEditorViewController: UIImagePickerControllerDelegate {
    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
       if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
          self.memeImageView.image = image
@@ -184,7 +188,7 @@ extension ViewController: UIImagePickerControllerDelegate {
 }
 
 //MARK: UINavigationDelegate
-extension ViewController: UINavigationControllerDelegate {
+extension MemeEditorViewController: UINavigationControllerDelegate {
    override func dismiss(animated flag: Bool, completion: (() -> Void)? = nil) {
       super.dismiss(animated: flag, completion: completion)
    }
