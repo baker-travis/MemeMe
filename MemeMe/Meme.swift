@@ -10,8 +10,16 @@ import Foundation
 import UIKit
 
 struct Meme {
-   let topText: String
-   let bottomText: String
-   let originalImage: UIImage
-   let memedImage: UIImage
+    let topText: String
+    let bottomText: String
+    let originalImage: UIImage
+    let memedImage: UIImage
+    
+    /// Retrieves all memes from the AppDelegate
+    ///
+    /// - Returns: array of all memes
+    static func getAllMemes() -> [Meme] {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        return appDelegate.memes
+    }
 }
